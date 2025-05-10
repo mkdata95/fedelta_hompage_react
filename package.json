@@ -1,0 +1,44 @@
+{
+  "name": "ai_web_test",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.7.0",
+    "@tinymce/tinymce-react": "^4.3.2",
+    "@types/uuid": "^10.0.0",
+    "caniuse-lite": "^1.0.30001717",
+    "next": "14.1.0",
+    "nodemailer": "^7.0.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-icons": "^5.0.1",
+    "sharp": "^0.34.1",
+    "sqlite": "^5.1.1",
+    "sqlite3": "^5.1.7",
+    "uuid": "^11.1.0"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
+    "@tailwindcss/postcss7-compat": "^2.2.17",
+    "@types/next": "^8.0.7",
+    "@types/node": "^20.17.43",
+    "@types/nodemailer": "^6.4.17",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "@types/react-icons": "^2.2.7",
+    "autoprefixer": "^10.4.21",
+    "eslint": "^8.56.0",
+    "eslint-config-next": "14.1.0",
+    "postcss": "^8.5.3",
+    "prisma": "^6.7.0",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}

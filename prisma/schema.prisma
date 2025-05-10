@@ -1,0 +1,73 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model About {
+  id            Int    @id @default(autoincrement())
+  title         String
+  visionTitle   String
+  visionContent String
+  valuesTitle   String
+  valuesItems   String // 여러 줄 텍스트(\n으로 구분)
+  logo          String?
+  greetingsTitle String?
+  greetingsDesc  String?
+  logoAlign      String?
+}
+
+model Service {
+  id          Int    @id @default(autoincrement())
+  title       String
+  description String
+  icon        String
+}
+
+model PhotoCard {
+  id      Int    @id @default(autoincrement())
+  title   String
+  desc    String
+  image   String
+}
+
+model Portfolio {
+  id      Int    @id @default(autoincrement())
+  title   String
+  period  String
+  overview String
+  image   String
+  details String?
+  category String?
+  client String?
+  size String?
+  role String?
+}
+
+model Notice {
+  id        Int      @id @default(autoincrement())
+  title     String
+  content   String
+  author    String
+  date      DateTime @default(now())
+  views     Int      @default(0)
+}
+
+model MainCard {
+  id    Int    @id @default(autoincrement())
+  title String
+  desc  String
+  link  String
+  icon  String
+}
+
+model InfoCard {
+  id      Int    @id @default(autoincrement())
+  title   String
+  desc    String
+  bgColor String
+  bgImage String?
+} 
