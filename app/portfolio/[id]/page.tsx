@@ -9,6 +9,28 @@ import { siteContent } from '../../../data/siteContent'
 
 const RichTextEditor = dynamic(() => import('@/components/RichTextEditor'), { ssr: false })
 
+// YouTube URL을 임베드 URL로 변환하는 함수
+function getYoutubeEmbedUrl(url: string): string {
+  if (!url) return '';
+  
+  // 이미 임베드 URL 형식인 경우
+  if (url.includes('youtube.com/embed/')) {
+    // 매개변수 추가
+    const separator = url.includes('?') ? '&' : '?';
+    return `${url}${separator}rel=0&modestbranding=1&showinfo=0`;
+  }
+  
+  // youtube.com/watch?v=VIDEO_ID 형식
+  let match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s]+)/);
+  if (match && match[1]) {
+    // 관련 영상을 표시하지 않는 매개변수 추가
+    return `https://www.youtube.com/embed/${match[1]}?rel=0&modestbranding=1&showinfo=0`;
+  }
+  
+  // 그 외 다른 형식이거나 잘못된 URL
+  return url;
+}
+
 interface Project {
   id: string;
   title: string;
@@ -22,6 +44,7 @@ interface Project {
   gallery?: any[];
   size?: string;
   description: string;
+  youtubeLink?: string;
 }
 
 export default function PortfolioDetail({ params }: { params: { id: string } }) {
@@ -138,7 +161,8 @@ export default function PortfolioDetail({ params }: { params: { id: string } }) 
       const updatedPortfolio = {
         ...portfolio,
         image: updatedImage,
-        description: editedContent
+        description: editedContent,
+        youtubeLink: portfolio.youtubeLink ? getYoutubeEmbedUrl(portfolio.youtubeLink) : undefined
       };
       
       const response = await fetch('/api/portfolio', {
@@ -148,13 +172,34 @@ export default function PortfolioDetail({ params }: { params: { id: string } }) 
       });
       
       if (response.ok) {
-        setPortfolio(updatedPortfolio);
-        setIsEditing(false);
-        setNewImage(null);
-        setSaveMessage('저장되었습니다!')
+        try {
+          // 응답이 JSON인지 확인
+          const contentType = response.headers.get('content-type');
+          if (contentType && contentType.includes('application/json')) {
+            await response.json(); // 응답 본문이 있으면 파싱
+          }
+          
+          setPortfolio(updatedPortfolio);
+          setIsEditing(false);
+          setNewImage(null);
+          setSaveMessage('저장되었습니다!')
+        } catch (jsonError) {
+          console.error('JSON 파싱 오류:', jsonError);
+          // JSON 파싱 오류가 발생해도 저장은 성공했으므로 UI 업데이트
+          setPortfolio(updatedPortfolio);
+          setIsEditing(false);
+          setNewImage(null);
+          setSaveMessage('저장되었습니다!')
+        }
       } else {
-        const errorData = await response.json();
-        throw new Error(errorData.error || '저장 중 오류가 발생했습니다.');
+        let errorMessage = '저장 중 오류가 발생했습니다.';
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorMessage;
+        } catch (e) {
+          // JSON 파싱 실패 시 기본 오류 메시지 사용
+        }
+        throw new Error(errorMessage);
       }
     } catch (error: any) {
       console.error('저장 오류:', error);
@@ -420,30 +465,49 @@ export default function PortfolioDetail({ params }: { params: { id: string } }) 
                 portfolio.overview
               )}
             </p>
-            
-            <div className="flex space-x-3 mt-8">
-              <button className="flex-1 bg-red-600 text-white py-3 px-4 rounded hover:bg-red-700 transition-colors">
-                구매하기
-              </button>
-              <button className="flex-1 bg-gray-100 text-gray-700 py-3 px-4 rounded hover:bg-gray-200 transition-colors">
-                장바구니
-              </button>
-            </div>
-            
-            <div className="mt-6 flex justify-center space-x-2">
-              <button className="bg-blue-500 text-white py-2 px-4 rounded-sm flex items-center">
-                <span>페이스북 공유</span>
-              </button>
-              <button className="bg-cyan-500 text-white py-2 px-4 rounded-sm flex items-center">
-                <span>트위터 공유</span>
-              </button>
-              <button className="bg-yellow-500 text-white py-2 px-4 rounded-sm flex items-center">
-                <span>카카오</span>
-              </button>
-            </div>
           </div>
         </div>
       </div>
+      
+      {/* YouTube 비디오 섹션 */}
+      {(portfolioToShow?.youtubeLink || isEditing) && (
+        <div className="mb-12">
+          <h2 className="text-xl font-semibold border-b border-gray-200 pb-2 mb-4">프로젝트 소개 영상</h2>
+          
+          {isEditing ? (
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                YouTube 영상 URL
+              </label>
+              <input
+                type="text"
+                value={portfolioToShow?.youtubeLink || ''}
+                onChange={(e) => setPortfolio({...portfolioToShow!, youtubeLink: e.target.value})}
+                placeholder="https://www.youtube.com/watch?v=VIDEO_ID"
+                className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <p className="mt-1 text-sm text-gray-500">
+                YouTube 영상 URL을 직접 붙여넣으세요. (예: https://www.youtube.com/watch?v=abcd1234)
+              </p>
+            </div>
+          ) : (
+            portfolioToShow?.youtubeLink && (
+              <div className="mb-8">
+                <iframe
+                  src={getYoutubeEmbedUrl(portfolioToShow.youtubeLink)}
+                  title="YouTube video player"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  width="100%"
+                  height="600"
+                  className="rounded-lg"
+                  style={{ aspectRatio: '16/9', maxHeight: '70vh' }}
+                ></iframe>
+              </div>
+            )
+          )}
+        </div>
+      )}
       
       {/* 상세 설명 */}
       <div className="mb-12">

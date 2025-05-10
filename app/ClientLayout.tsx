@@ -69,7 +69,14 @@ export default function ClientLayout({ children }: { children: ReactNode }) {
             <div className="container mx-auto flex items-center justify-between px-8 h-full">
               {/* 좌측: 로고 */}
               <Link href="/" className="flex items-center text-2xl font-extrabold text-white tracking-widest min-w-[252px]">
-                <Image src="/images/fedelta-logo-hologram.png" alt="FEDELTA 로고" width={252} height={112} style={{height:'112px', width:'auto'}} priority />
+                <Image 
+                  src="/images/fedelta-logo-hologram.png" 
+                  alt="FEDELTA 로고" 
+                  width={112} 
+                  height={112} 
+                  style={{width:'112px', height:'112px'}} 
+                  priority 
+                />
               </Link>
               {/* 중앙: 메뉴 */}
             <ul className="flex gap-8 items-center text-white font-medium justify-center flex-1">

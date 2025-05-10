@@ -204,231 +204,185 @@ export default function DownloadsPage() {
   }
 
   return (
-    <main className="pt-20">
-      {/* Hero Section */}
-      <section className="py-20">
-        <div className="container mx-auto px-4 rounded-xl py-16 flex flex-col justify-center" style={{ background: '#393E46' }}>
-          <h1 className="text-4xl font-bold mb-4 pl-4 md:pl-16" style={{ color: '#DFD0B8' }}>자료다운로드</h1>
-          <p className="text-xl pl-4 md:pl-16" style={{ color: '#DFD0B8' }}>페델타의 제품 및 서비스 관련 자료를 다운로드하실 수 있습니다</p>
-        </div>
-      </section>
-
-      {/* Downloads Categories */}
-      <section className="py-20">
-        <div className="container mx-auto px-4">
-          <div className="max-w-6xl mx-auto">
-            <div className="flex flex-wrap justify-between items-center gap-4 mb-12">
-              <div className="flex flex-wrap gap-2">
-                <button 
-                  className={`px-6 py-2 rounded-full hover:bg-[#948979] hover:text-[#222831] ${
-                    selectedCategory === '전체' 
-                      ? 'bg-[#222831] text-[#DFD0B8]' 
-                      : 'bg-[#DFD0B8] text-[#393E46]'
-                  }`}
-                  onClick={() => setSelectedCategory('전체')}
-                >
-                  전체
-                </button>
-                
-                {categories.map((category) => (
-                  <div key={category.id} className="flex items-center">
-                    {isLoggedIn && editingCategoryId === category.id ? (
-                      <div className="flex items-center bg-white rounded-full overflow-hidden shadow">
-                        <input
-                          type="text"
-                          value={editingCategoryName}
-                          onChange={(e) => setEditingCategoryName(e.target.value)}
-                          className="px-3 py-1 focus:outline-none"
-                        />
-                        <button 
-                          onClick={() => handleEditCategorySave(category)}
-                          className="p-2 text-green-600 hover:text-green-800"
-                        >
-                          <FiCheck size={18} />
-                        </button>
-                      </div>
-                    ) : (
-                      <>
-                        <button 
-                          className={`px-6 py-2 rounded-full hover:bg-[#948979] hover:text-[#222831] ${
-                            selectedCategory === category.name 
-                              ? 'bg-[#222831] text-[#DFD0B8]' 
-                              : 'bg-[#DFD0B8] text-[#393E46]'
-                          }`}
-                          onClick={() => setSelectedCategory(category.name)}
-                        >
-                          {category.name}
-                        </button>
-                        
-                        {isLoggedIn && (
-                          <div className="flex ml-1">
-                            <button 
-                              onClick={() => handleEditCategoryStart(category)}
-                              disabled={isSubmitting}
-                              className="p-1 text-blue-600 hover:text-blue-800"
-                            >
-                              <FiEdit2 size={14} />
-                            </button>
-                            <button 
-                              onClick={() => handleDeleteCategory(category)}
-                              disabled={isSubmitting}
-                              className="p-1 text-red-500 hover:text-red-700"
-                            >
-                              <FiTrash2 size={14} />
-                            </button>
-                          </div>
-                        )}
-                      </>
-                    )}
-                  </div>
-                ))}
-              </div>
-              
-              {isLoggedIn && (
-                <div>
-                  {showAddCategoryForm ? (
-                    <div className="flex items-center bg-white rounded-full overflow-hidden shadow">
-                      <input
-                        type="text"
-                        value={newCategoryName}
-                        onChange={(e) => setNewCategoryName(e.target.value)}
-                        placeholder="새 카테고리 이름"
-                        className="px-4 py-2 focus:outline-none"
-                      />
-                      <button 
-                        onClick={handleAddCategory}
-                        disabled={isSubmitting}
-                        className="px-4 py-2 bg-[#222831] text-[#DFD0B8] hover:bg-[#948979]"
-                      >
-                        추가
-                      </button>
-                      <button 
-                        onClick={() => setShowAddCategoryForm(false)}
-                        disabled={isSubmitting}
-                        className="px-3 py-2 text-gray-500 hover:text-gray-700"
-                      >
-                        취소
-                      </button>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={() => setShowAddCategoryForm(true)}
-                      disabled={isSubmitting}
-                      className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#222831] text-[#DFD0B8] hover:bg-[#948979]"
-                    >
-                      <FiPlus /> 카테고리 추가
-                    </button>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {isLoading ? (
-              <div className="text-center py-12">
-                <p className="text-gray-600">자료를 불러오는 중입니다...</p>
-              </div>
-            ) : filteredDownloads.length > 0 ? (
-              <div className="space-y-6">
-                {filteredDownloads.map((item) => (
-                  <div key={item.id} className="bg-white rounded-xl shadow-lg p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <span className="text-sm text-[#222831] font-medium">{item.category}</span>
-                        <h3 className="text-xl font-semibold mt-2 mb-2">{item.title}</h3>
-                        <p className="text-gray-600">{item.description}</p>
-                      </div>
-                      <div className="flex items-center">
-                        <a
-                          href={item.file_url}
-                          className="flex items-center space-x-2 text-blue-600 hover:text-blue-700 font-medium"
-                          download
-                        >
-                          <span>다운로드</span>
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                          </svg>
-                        </a>
-                        
-                        {isLoggedIn && (
-                          <div className="flex ml-4">
-                            <Link 
-                              href={`/admin/downloads/edit/${item.id}`}
-                              className="p-1 text-blue-600 hover:text-blue-800"
-                            >
-                              <FiEdit2 size={18} />
-                            </Link>
-                            <button
-                              onClick={() => {
-                                if (confirm(`"${item.title}" 자료를 삭제하시겠습니까?`)) {
-                                  fetch('/api/downloads', {
-                                    method: 'DELETE',
-                                    headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({ id: item.id }),
-                                  })
-                                  .then(res => {
-                                    if (res.ok) {
-                                      setDownloads(downloads.filter(d => d.id !== item.id))
-                                    } else {
-                                      alert('삭제 실패')
-                                    }
-                                  })
-                                }
-                              }}
-                              disabled={isSubmitting}
-                              className="p-1 text-red-500 hover:text-red-700"
-                            >
-                              <FiTrash2 size={18} />
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-12">
-                <p className="text-gray-600">해당 카테고리에 자료가 없습니다.</p>
-                
-                {isLoggedIn && (
-                  <div className="mt-4">
-                    <Link
-                      href="/admin/downloads/new"
-                      className="inline-flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                    >
-                      <FiDownload /> 새 자료 등록하기
-                    </Link>
-                  </div>
-                )}
-              </div>
-            )}
-            
-            {saveMessage && (
-              <div className="fixed bottom-4 right-4 bg-green-100 text-green-800 p-3 rounded-lg shadow-lg">
-                {saveMessage}
-              </div>
-            )}
-          </div>
-        </div>
-      </section>
-
-      {/* Contact Section */}
-      <section className="py-20 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-3xl font-bold mb-8">추가 자료가 필요하신가요?</h2>
-            <p className="text-gray-600 mb-8">
-              필요한 자료가 없으시다면 언제든지 문의해 주세요. 빠른 시일 내에 답변 드리겠습니다.
-            </p>
-            <Link
-              href="/contact"
-              className="inline-block bg-[#222831] text-[#DFD0B8] px-8 py-3 rounded-lg font-semibold hover:bg-[#948979] hover:text-[#222831] transition-colors"
+    <div className="bg-gray-50 min-h-screen">
+      {/* 상단 비주얼 */}
+      <div className="relative w-full h-56 bg-black flex items-center justify-center mt-24">
+        <h1 className="text-white text-4xl md:text-5xl font-extrabold tracking-tight">자료다운로드</h1>
+      </div>
+      
+      {/* 탭 메뉴 */}
+      <div className="bg-white border-b">
+        <div className="flex justify-center gap-8 py-4">
+          <button 
+            className={`px-5 py-2 text-lg ${selectedCategory === '전체' ? 'font-bold border-b-2 border-black text-black' : 'text-gray-500 hover:text-black'}`}
+            onClick={() => setSelectedCategory('전체')}
+          >
+            전체
+          </button>
+          {categories.map((category) => (
+            <button 
+              key={category.id}
+              className={`px-5 py-2 text-lg ${selectedCategory === category.name ? 'font-bold border-b-2 border-black text-black' : 'text-gray-500 hover:text-black'}`}
+              onClick={() => setSelectedCategory(category.name)}
             >
-              문의하기
-            </Link>
-          </div>
+              {category.name}
+            </button>
+          ))}
+          
+          {isLoggedIn && showAddCategoryForm && (
+            <div className="flex items-center">
+              <input
+                type="text"
+                value={newCategoryName}
+                onChange={(e) => setNewCategoryName(e.target.value)}
+                placeholder="새 카테고리"
+                className="border px-2 py-1 text-sm"
+              />
+              <button 
+                onClick={handleAddCategory}
+                disabled={isSubmitting}
+                className="ml-2 px-2 py-1 bg-blue-600 text-white text-sm rounded"
+              >
+                추가
+              </button>
+              <button 
+                onClick={() => setShowAddCategoryForm(false)}
+                disabled={isSubmitting}
+                className="ml-1 px-2 py-1 bg-gray-200 text-gray-700 text-sm rounded"
+              >
+                취소
+              </button>
+            </div>
+          )}
         </div>
-      </section>
-    </main>
+      </div>
+
+      {/* 다운로드 목록 */}
+      <div className="container mx-auto py-8 px-2" style={{ maxWidth: '1100px' }}>
+        <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-4 gap-2">
+          <div>전체 <span className="text-blue-600 font-bold">{filteredDownloads.length}</span>건</div>
+          
+          {isLoggedIn && (
+            <div className="flex gap-2">
+              {!showAddCategoryForm && (
+                <button
+                  onClick={() => setShowAddCategoryForm(true)}
+                  disabled={isSubmitting}
+                  className="bg-gray-600 text-white px-4 py-2 rounded font-bold text-sm"
+                >
+                  카테고리 추가
+                </button>
+              )}
+              <Link 
+                href="/admin/downloads/new"
+                className="bg-blue-600 text-white px-4 py-2 rounded font-bold"
+              >
+                자료 등록
+              </Link>
+            </div>
+          )}
+        </div>
+
+        {isLoading ? (
+          <div className="text-center py-12">
+            <p className="text-gray-600">자료를 불러오는 중입니다...</p>
+          </div>
+        ) : filteredDownloads.length > 0 ? (
+          <div className="overflow-x-auto bg-white rounded-none shadow border border-gray-300">
+            <table className="w-full text-sm border-collapse">
+              <thead>
+                <tr className="bg-gray-100 border-b border-gray-300">
+                  <th className="p-3 font-bold text-gray-900 border-r border-gray-200">순번</th>
+                  <th className="p-3 font-bold text-gray-900 border-r border-gray-200">카테고리</th>
+                  <th className="p-3 font-bold text-gray-900 border-r border-gray-200">제목</th>
+                  <th className="p-3 font-bold text-gray-900 border-r border-gray-200">다운로드</th>
+                  <th className="p-3 font-bold text-gray-900 border-r border-gray-200">등록일</th>
+                  {isLoggedIn && (
+                    <th className="p-3 font-bold text-gray-900">관리</th>
+                  )}
+                </tr>
+              </thead>
+              <tbody>
+                {[...filteredDownloads]
+                  .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+                  .map((item, index, arr) => (
+                  <tr key={item.id} className="border-b border-gray-200 hover:bg-blue-50 transition">
+                    <td className="p-2 text-center font-medium text-gray-800 border-r border-gray-100">{arr.length - index}</td>
+                    <td className="p-2 text-center font-medium text-gray-800 border-r border-gray-100">{item.category}</td>
+                    <td className="p-2 text-left border-r border-gray-100">
+                      <div className="font-semibold">{item.title}</div>
+                      <div className="text-gray-600 text-xs mt-1">{item.description}</div>
+                    </td>
+                    <td className="p-2 text-center border-r border-gray-100">
+                      <a
+                        href={item.file_url}
+                        className="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium"
+                        download
+                      >
+                        <FiDownload className="mr-1" /> 다운로드
+                      </a>
+                    </td>
+                    <td className="p-2 text-center text-gray-700 border-r border-gray-100">{item.created_at.slice(0, 10)}</td>
+                    {isLoggedIn && (
+                      <td className="p-2 flex gap-2 justify-center">
+                        <Link 
+                          href={`/admin/downloads/edit/${item.id}`} 
+                          className="text-xs text-white bg-gray-800 rounded-none font-bold px-3 py-1 hover:bg-black transition"
+                        >
+                          수정
+                        </Link>
+                        <button
+                          onClick={() => {
+                            if (confirm(`"${item.title}" 자료를 삭제하시겠습니까?`)) {
+                              fetch('/api/downloads', {
+                                method: 'DELETE',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ id: item.id }),
+                              })
+                              .then(res => {
+                                if (res.ok) {
+                                  setDownloads(downloads.filter(d => d.id !== item.id))
+                                } else {
+                                  alert('삭제 실패')
+                                }
+                              })
+                            }
+                          }}
+                          disabled={isSubmitting}
+                          className="text-xs text-white bg-red-600 rounded-none font-bold px-3 py-1 hover:bg-red-700 transition"
+                        >
+                          삭제
+                        </button>
+                      </td>
+                    )}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="text-center py-12 bg-white border border-gray-300 rounded-none shadow">
+            <p className="text-gray-600">해당 카테고리에 자료가 없습니다.</p>
+            
+            {isLoggedIn && (
+              <div className="mt-4">
+                <Link
+                  href="/admin/downloads/new"
+                  className="inline-flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                >
+                  <FiDownload /> 새 자료 등록하기
+                </Link>
+              </div>
+            )}
+          </div>
+        )}
+        
+        {saveMessage && (
+          <div className="fixed bottom-4 right-4 bg-green-100 text-green-800 p-3 rounded-lg shadow-lg">
+            {saveMessage}
+          </div>
+        )}
+      </div>
+    </div>
   )
 } 

@@ -35,6 +35,7 @@ export async function POST(req: NextRequest) {
     
     return NextResponse.json({ 
       fileUrl,
+      url: fileUrl,
       fileName: file.name,
       size: file.size
     })

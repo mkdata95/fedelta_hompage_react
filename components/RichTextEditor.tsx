@@ -11,7 +11,7 @@ interface RichTextEditorProps {
  * React-Quill이 React 18과 호환성 문제가 있어서 임시로 사용
  */
 const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange }) => {
-  const handleImageUpload = async (blobInfo: any) => {
+  const handleImageUpload = async (blobInfo: any, progress: any) => {
     try {
       const formData = new FormData();
       formData.append('file', blobInfo.blob(), blobInfo.filename());
@@ -26,10 +26,13 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange }) => {
       }
 
       const data = await response.json();
+      console.log('업로드 응답:', data);
+      
+      // API 응답에서 url 필드 사용 (TinyMCE 표준)
       return data.url;
     } catch (error) {
       console.error('이미지 업로드 오류:', error);
-      throw new Error('이미지 업로드에 실패했습니다.');
+      throw error; // 전체 오류 객체 반환하여 TinyMCE에서 처리
     }
   };
 
@@ -53,6 +56,11 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange }) => {
           'image media table | removeformat | help',
         content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
         images_upload_handler: handleImageUpload,
+        automatic_uploads: true,
+        images_reuse_filename: true,
+        relative_urls: false,
+        remove_script_host: false,
+        convert_urls: false, // URL 자동 변환 방지
         font_size_formats: '8pt 10pt 12pt 14pt 16pt 18pt 24pt 36pt 48pt',
         font_family_formats: '나눔고딕=Nanum Gothic, 나눔명조=Nanum Myeongjo, 맑은 고딕=Malgun Gothic, 굴림=Gulim, 돋움=Dotum, 바탕=Batang, 궁서=Gungsuh, Arial=arial,helvetica,sans-serif; Arial Black=arial black,avant garde; Book Antiqua=book antiqua,palatino; Comic Sans MS=comic sans ms,sans-serif; Courier New=courier new,courier; Georgia=georgia,palatino; Helvetica=helvetica; Impact=impact,chicago; Symbol=symbol; Tahoma=tahoma,arial,helvetica,sans-serif; Terminal=terminal,monaco; Times New Roman=times new roman,times; Verdana=verdana,geneva; Webdings=webdings; Wingdings=wingdings,zapf dingbats'
       }}

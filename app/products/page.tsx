@@ -333,48 +333,53 @@ export default function ProductsPage() {
               </div>
             ) : (
               filteredProducts.map((product, index) => (
-                <div 
-                  key={product.id} 
-                  className="bg-white shadow hover:shadow-lg transition overflow-hidden flex flex-col"
-                  style={{ width: 390, height: 390, minWidth: 390, minHeight: 390, maxWidth: 390, maxHeight: 390, borderRadius: 0 }}
+                <Link 
+                  href={`/products/${product.id}`}
+                  key={product.id}
                 >
                   <div 
-                    className="bg-gray-100 overflow-hidden"
-                    style={{ width: 390, height: 290 }}
+                    className="bg-white shadow hover:shadow-lg transition overflow-hidden flex flex-col cursor-pointer"
+                    style={{ width: 390, height: 390, minWidth: 390, minHeight: 390, maxWidth: 390, maxHeight: 390, borderRadius: 0 }}
                   >
-                    {product.image && (
-                      <img
-                        src={product.image}
-                        alt={product.title}
-                        className="object-cover"
-                        style={{ width: 390, height: 290, display: 'block' }}
-                      />
-                    )}
-                    {/* 삭제 버튼: 관리자만 노출 */}
-                    {isLoggedIn && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (window.confirm('정말 삭제하시겠습니까?')) deleteProduct(product.id)
-                        }}
-                        className="absolute top-3 right-3 bg-white/80 hover:bg-red-100 text-red-500 rounded-full p-2 shadow transition-opacity opacity-100 hover:scale-110"
-                        title="삭제"
-                      >
-                        <FiTrash2 size={20} />
-                      </button>
-                    )}
-                  </div>
-                  <div className="p-5 flex flex-col flex-1" style={{height: 100, minHeight: 100, maxHeight: 100}}>
-                    <h3 className="text-lg font-bold mb-2">{product.title}</h3>
-                    <p className="text-gray-600 text-sm mb-2 flex-1 overflow-hidden">{product.description || '제품소개 준비중입니다.'}</p>
-                    <div className="flex items-center justify-between text-xs text-gray-400">
-                      {product.category && (
-                        <span>{product.category}</span>
+                    <div 
+                      className="bg-gray-100 overflow-hidden"
+                      style={{ width: 390, height: 290 }}
+                    >
+                      {product.image && (
+                        <img
+                          src={product.image}
+                          alt={product.title}
+                          className="object-cover"
+                          style={{ width: 390, height: 290, display: 'block' }}
+                        />
                       )}
-                      <Link href={`/products/${product.id}`} className="text-blue-500 hover:underline">상세 보기</Link>
+                      {/* 삭제 버튼: 관리자만 노출 */}
+                      {isLoggedIn && (
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            if (window.confirm('정말 삭제하시겠습니까?')) deleteProduct(product.id)
+                          }}
+                          className="absolute top-3 right-3 bg-white/80 hover:bg-red-100 text-red-500 rounded-full p-2 shadow transition-opacity opacity-100 hover:scale-110"
+                          title="삭제"
+                        >
+                          <FiTrash2 size={20} />
+                        </button>
+                      )}
+                    </div>
+                    <div className="p-5 flex flex-col flex-1" style={{height: 100, minHeight: 100, maxHeight: 100}}>
+                      <h3 className="text-lg font-bold mb-2">{product.title}</h3>
+                      <p className="text-gray-600 text-sm mb-2 flex-1 overflow-hidden">{product.description || '제품소개 준비중입니다.'}</p>
+                      <div className="flex items-center justify-between text-xs text-gray-400">
+                        {product.category && (
+                          <span>{product.category}</span>
+                        )}
+                        <span className="text-blue-500 hover:underline">상세 보기</span>
+                      </div>
                     </div>
                   </div>
-                </div>
+                </Link>
               ))
             )}
           </div>
