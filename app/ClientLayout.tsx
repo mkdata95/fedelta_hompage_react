@@ -194,6 +194,9 @@ export default function ClientLayout({ children }: { children: ReactNode }) {
       {!isAdmin && <Footer />}
         </>
       )}
+      {isAdmin && (
+        <>{children}</>
+      )}
     </>
   )
 } 
