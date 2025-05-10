@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { siteContent } from '../data/siteContent'
 import Image from 'next/image'
+import dynamic from 'next/dynamic'
 
 const timelineDefault = siteContent.about.timeline || [
   { year: '2003', event: '회사 설립\nDPC 법인설립' },
@@ -15,6 +16,8 @@ const timelineDefault = siteContent.about.timeline || [
 
 // 기본 로고 이미지 경로 수정
 const defaultLogo = '/images/default-logo.png'
+
+const Editor = dynamic(() => import('@tinymce/tinymce-react').then(mod => mod.Editor), { ssr: false }) as any
 
 export default function AboutPage() {
   const [isAdmin, setIsAdmin] = useState(false)
@@ -185,12 +188,29 @@ export default function AboutPage() {
             {editMode ? (
               <>
                 <input className="text-2xl font-bold mb-6 text-[#222831] w-full bg-white/80 px-2 py-1 rounded" value={aboutDraft.visionTitle} onChange={e => setAboutDraft(d => ({ ...d, visionTitle: e.target.value }))} />
-                <textarea className="text-base leading-relaxed text-gray-700 mb-4 w-full bg-white/80 px-2 py-1 rounded" value={aboutDraft.visionContent} onChange={e => setAboutDraft(d => ({ ...d, visionContent: e.target.value }))} rows={4} />
+                <div className="w-full mb-4">
+                  <Editor
+                    apiKey="no-api-key"
+                    value={aboutDraft.visionContent}
+                    init={{
+                      height: 200,
+                      menubar: false,
+                      plugins: [
+                        'advlist autolink lists link charmap preview anchor',
+                        'searchreplace visualblocks code',
+                        'insertdatetime table paste help wordcount'
+                      ],
+                      toolbar:
+                        'undo redo | formatselect | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | help',
+                    }}
+                    onEditorChange={content => setAboutDraft(d => ({ ...d, visionContent: content }))}
+                  />
+                </div>
               </>
             ) : (
               <>
                 <div className="text-2xl font-bold mb-6 text-[#222831]">{about.visionTitle}</div>
-                <div className="text-base leading-relaxed text-gray-700 mb-4 whitespace-pre-line">{about.visionContent}</div>
+                <div className="text-base leading-relaxed text-gray-700 mb-4 whitespace-pre-line" dangerouslySetInnerHTML={{__html: about.visionContent}} />
               </>
             )}
           </div>
@@ -213,23 +233,6 @@ export default function AboutPage() {
               </ul>
             </>
           )}
-        </div>
-      </section>
-      {/* 걸어온 길(타임라인) - 하단 가로형 */}
-      <section className="py-12 bg-gray-50 border-t">
-        <div className="container mx-auto px-4 max-w-6xl">
-          <h2 className="text-2xl font-bold mb-8 text-[#B85C38] text-center">걸어온 길</h2>
-          <div className="flex flex-row items-start justify-center gap-8 overflow-x-auto pb-4">
-            {(about.timeline || timelineDefault).map((item, idx) => (
-              <div key={idx} className="flex flex-col items-center min-w-[160px]">
-                <div className="w-14 h-14 rounded-full bg-[#222831] text-[#DFD0B8] flex items-center justify-center text-lg font-bold mb-2">{item.year}</div>
-                <div className="text-gray-700 text-center whitespace-pre-line text-sm">{item.event}</div>
-                {idx < (about.timeline || timelineDefault).length - 1 && (
-                  <div className="w-16 h-1 bg-[#948979] my-4 mx-auto rounded-full"></div>
-                )}
-              </div>
-            ))}
-          </div>
         </div>
       </section>
       {/* 관리자용 버튼 */}

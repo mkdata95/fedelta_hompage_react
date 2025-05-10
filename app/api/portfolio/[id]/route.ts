@@ -9,7 +9,7 @@ export async function GET(
     console.log('Fetching portfolio with ID:', params.id)
     
     const portfolio = await prisma.portfolio.findUnique({
-      where: { id: params.id }
+      where: { id: Number(params.id) }
     })
 
     if (!portfolio) {
@@ -38,7 +38,7 @@ export async function PUT(
     const { title, overview, details, image, category, client, size, role } = body
 
     const updatedPortfolio = await prisma.portfolio.update({
-      where: { id: params.id },
+      where: { id: Number(params.id) },
       data: {
         title,
         overview,

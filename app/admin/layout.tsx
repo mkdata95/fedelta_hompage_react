@@ -13,25 +13,29 @@ export default function AdminLayout({
   const pathname = usePathname()
   const router = useRouter()
   const [isAuth, setIsAuth] = useState(false)
+  const [checked, setChecked] = useState(false)
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
   const [settingsOpen, setSettingsOpen] = useState(false)
 
+  console.log('admin layout 파일 진입');
+
   useEffect(() => {
-    // /admin/login에서는 인증 체크하지 않음
-    if (pathname === '/admin/login') return
-    // 쿠키 검사
+    if (pathname === '/admin/login') {
+      setChecked(true)
+      return
+    }
     const cookies = document.cookie.split(';').map(c => c.trim())
     const found = cookies.find(c => c.startsWith('admin_auth='))
     if (found && found.split('=')[1] === '1') {
       setIsAuth(true)
+      setChecked(true)
     } else {
       router.replace('/admin/login')
     }
   }, [pathname, router])
 
-  if (pathname !== '/admin/login' && !isAuth) {
-    return null // 인증 전에는 아무것도 렌더링하지 않음
-  }
+  if (!checked) return <div>로딩중...</div>;
+  if (pathname !== '/admin/login' && !isAuth) return <div>인증 안됨</div>;
 
   const menuItems = [
     { name: '대시보드', path: '/admin' },
