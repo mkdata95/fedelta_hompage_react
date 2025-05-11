@@ -1,10 +1,20 @@
 'use client'
 
 import { useState } from 'react'
-import { siteContent } from '../../data/siteContent'
+
+// siteContent를 대체할 임시 데이터
+const defaultContent = {
+  hero: {
+    title: '임시 타이틀',
+    titleHighlight: '임시 강조',
+    description: '임시 설명',
+    primaryButton: '주요 버튼',
+    secondaryButton: '보조 버튼'
+  }
+};
 
 export default function HeroPage() {
-  const [content, setContent] = useState(siteContent)
+  const [content, setContent] = useState(defaultContent)
   const [isSaving, setIsSaving] = useState(false)
   const [saveMessage, setSaveMessage] = useState('')
 
