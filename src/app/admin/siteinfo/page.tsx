@@ -1,10 +1,22 @@
 "use client"
 
 import { useState } from 'react'
-import { siteContent } from '../../data/siteContent'
+// import { siteContent } from '../../data/siteContent'
+
+// 임시 데이터
+const defaultSiteInfo = {
+  siteName: '임시 사이트명',
+  companyName: '임시 회사명',
+  businessNumber: '000-00-00000',
+  ceoName: '홍길동',
+  phone: '010-0000-0000',
+  address: '서울특별시',
+  email: 'test@example.com'
+};
 
 export default function SiteInfoPage() {
-  const [info, setInfo] = useState(siteContent.siteInfo)
+  // const [info, setInfo] = useState(siteContent.siteInfo)
+  const [info, setInfo] = useState(defaultSiteInfo)
   const [isSaving, setIsSaving] = useState(false)
   const [saveMessage, setSaveMessage] = useState('')
 
@@ -15,8 +27,8 @@ export default function SiteInfoPage() {
   const handleSave = async () => {
     setIsSaving(true)
     setSaveMessage('저장 중...')
+    // 임시 newContent
     const newContent = {
-      ...siteContent,
       siteInfo: info
     }
     try {
