@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useState, useEffect, useMemo } from 'react'
 import { FiTrash2, FiPlus, FiTag, FiX } from 'react-icons/fi'
 import Image from 'next/image'
+import PageHeader from '../components/PageHeader'
 
 // UUID 생성 함수
 function generateUUID() {
@@ -149,14 +150,11 @@ export default function ProductsPage() {
 
   return (
     <main className="bg-white min-h-screen">
-      {/* Hero Section */}
-      <div className="relative w-full h-64 md:h-80 flex items-center justify-center" style={{ backgroundColor: '#181617', backgroundImage: 'url(/images/hero-default.jpg)', backgroundSize: 'cover', backgroundPosition: 'center', marginTop: '48px' }}>
-        <div className="absolute inset-0 bg-black opacity-60"></div>
-        <div className="relative z-10 text-center w-full pt-12">
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-2">제품소개</h1>
-          <p className="text-lg text-gray-200">보다 발전된 기술로 보다 참신한 제품을 생산합니다.</p>
-        </div>
-      </div>
+      <PageHeader
+        title="제품소개"
+        subtitle="보다 발전된 기술로 보다 참신한 제품을 생산합니다."
+        pageKey="products"
+      />
       {/* 경로 네비게이션 */}
       <div className="bg-white border-b">
         <div className="max-w-6xl mx-auto px-4 flex items-center text-gray-400 text-sm gap-2 py-4">

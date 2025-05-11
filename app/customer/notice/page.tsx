@@ -1,7 +1,7 @@
 "use client"
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import CustomerCenterHeader from '../../components/CustomerCenterHeader'
+import PageHeader from '../../components/PageHeader'
 
 interface Notice {
   id: number
@@ -30,7 +30,16 @@ export default function NoticePage() {
 
   return (
     <div className="bg-gray-50 min-h-screen">
-      <CustomerCenterHeader activeTab="notice" />
+      <PageHeader title="고객센터" pageKey="customer" />
+      {/* 탭 메뉴 */}
+      <div className="bg-white border-b">
+        <div className="flex justify-center gap-8 py-4">
+          <Link href="/customer/notice" className="font-bold border-b-2 border-black text-black px-4 transition-colors text-lg">공지사항</Link>
+          <Link href="/customer/quote" className="text-gray-500 hover:text-black px-4 transition-colors text-lg">견적요청</Link>
+          <Link href="/contact" className="text-gray-500 hover:text-black px-4 transition-colors text-lg">문의하기</Link>
+          <Link href="/location" className="text-gray-500 hover:text-black px-4 transition-colors text-lg">오시는길</Link>
+        </div>
+      </div>
       {/* 공지사항 리스트 */}
       <div className="container mx-auto py-8 px-2" style={{ maxWidth: '1100px' }}>
         <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-4 gap-2">

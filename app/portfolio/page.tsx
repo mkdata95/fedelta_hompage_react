@@ -5,6 +5,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { FiTrash2, FiPlus, FiTag } from 'react-icons/fi'
 import { v4 as uuidv4 } from 'uuid'
+import PageHeader from '../components/PageHeader'
 
 // 이미지 리사이징 및 최적화 함수 추가
 function resizeAndOptimizeImage(file: File, maxWidth = 1920, maxHeight = 1080, quality = 0.8): Promise<string> {
@@ -204,14 +205,12 @@ export default function PortfolioPage() {
   }
 
   return (
-    <main className="pt-20">
-      {/* Hero Section */}
-      <section
-        className="relative h-64 w-full flex items-center justify-center mb-8"
-        style={{ background: '#111', minHeight: '16rem', width: '100%', zIndex: 1 }}
-      >
-        <h1 className="text-4xl font-bold text-white">주요 실적</h1>
-      </section>
+    <main>
+      <PageHeader
+        title="주요 실적"
+        subtitle="고객과 함께한 성공적인 프로젝트들을 소개합니다."
+        pageKey="portfolio"
+      />
 
       {/* 네비게이션 */}
       <nav className="w-full flex justify-start mb-4" style={{ maxWidth: '1200px', margin: '0 auto' }}>

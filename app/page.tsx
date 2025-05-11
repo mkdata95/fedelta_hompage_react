@@ -218,6 +218,7 @@ export default function Home() {
   const [servicesEditMode, setServicesEditMode] = useState(false)
   const [servicesForm, setServicesForm] = useState({
     title: initialSiteContent.services.title,
+    desc: initialSiteContent.services.desc || '당사의 다양한 사업 영역을 소개합니다.',
     items: initialSiteContent.services.items.map(item => ({ ...item })),
   })
   const [saveMsg, setSaveMsg] = useState('')
@@ -256,10 +257,10 @@ export default function Home() {
   // 하단 4개 카드 인라인 수정 상태
   const [cardEditIdx, setCardEditIdx] = useState(-1);
   const [cards, setCards] = useState([
-    { title: '온라인문의', desc: '궁금하신 내용을 남겨주시면 신속하고 답변드리겠습니다.', link: '/contact', icon: '📝' },
+    { title: '제품안내', desc: 'feteta의 최신의 제품을 소개한다.', link: '/products', icon: '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>' },
     { title: 'FAQ', desc: '고객님들이 가장 궁금해 하시는 질문들이 여기에 있습니다.', link: '/faq', icon: '❓' },
     { title: '갤러리', desc: '다온테마만의 다양한 소식을 이미지로 만나보세요.', link: '/gallery', icon: '📷' },
-    { title: '채용안내', desc: '창의적이고 도전적인 인재를 기다리고 있습니다.', link: '/recruit', icon: '💙' },
+    { title: '오시는길', desc: '다온테마의 위치와 오시는 길을 안내합니다.', link: '/location', icon: '<svg viewBox="0 0 24 24" fill="currentColor" width="32" height="32"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5A2.5 2.5 0 1112 6a2.5 2.5 0 010 5.5z"/></svg>' },
   ]);
   const [cardDraft, setCardDraft] = useState(cards);
   // 전화/오시는 길 카드 상태 추가
@@ -434,6 +435,7 @@ export default function Home() {
           services: {
             ...initialSiteContent.services,
             title: servicesForm.title,
+            desc: servicesForm.desc,
             items: servicesForm.items,
           },
         }),
@@ -453,20 +455,40 @@ export default function Home() {
   const handlePhotoSave = async () => {
     setPhotoSaveMsg('저장 중...')
     try {
-      // 각 카드별로 PUT 또는 POST
+      // 현재 DB에 있는 모든 카드를 가져와서 삭제된 카드를 확인
+      const existingRes = await fetch('/api/photo-cards');
+      const existingCards = await existingRes.json();
+      
+      // 삭제된 카드 찾기 (DB에는 있지만 현재 draft에는 없는 카드)
+      const deletedCards = existingCards.filter(
+        existingCard => !photoCardsDraft.some(
+          draftCard => draftCard.id === existingCard.id
+        )
+      );
+      
+      // 삭제된 카드를 DB에서도 삭제
+      for (const card of deletedCards) {
+        if (card.id) {
+          await fetch(`/api/photo-cards?id=${card.id}`, {
+            method: 'DELETE'
+          });
+        }
+      }
+
+      // 남은 카드 저장 (수정 또는 새로 추가)
       for (const card of photoCardsDraft) {
         if (card.id) {
           await fetch('/api/photo-cards', {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(card),
-          })
+          });
         } else {
           await fetch('/api/photo-cards', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(card),
-          })
+          });
         }
       }
 
@@ -481,20 +503,21 @@ export default function Home() {
             desc: photoSectionDraft.desc,
           },
         }),
-      })
+      });
 
       // 저장 후 다시 불러오기
-      const res = await fetch('/api/photo-cards')
-      const data = await res.json()
-      setPhotoCards(data)
-      setPhotoCardsDraft(data)
-      setPhotoSectionEdit(photoSectionDraft)
-      setPhotoEditMode(false)
-      setPhotoSaveMsg('저장되었습니다!')
-    } catch {
-      setPhotoSaveMsg('저장 실패')
+      const res = await fetch('/api/photo-cards');
+      const data = await res.json();
+      setPhotoCards(data);
+      setPhotoCardsDraft(data);
+      setPhotoSectionEdit(photoSectionDraft);
+      setPhotoEditMode(false);
+      setPhotoSaveMsg('저장되었습니다!');
+    } catch (error) {
+      console.error('저장 중 오류 발생:', error);
+      setPhotoSaveMsg('저장 실패');
     }
-    setTimeout(() => setPhotoSaveMsg(''), 2000)
+    setTimeout(() => setPhotoSaveMsg(''), 2000);
   }
 
   const handlePhotoFileChange = async (e: React.ChangeEvent<HTMLInputElement>, idx: number) => {
@@ -803,6 +826,14 @@ export default function Home() {
                       value={cardDraft[idx].link}
                       onChange={e => setCardDraft(d => { const next = [...d]; next[idx].link = e.target.value; return next; })}
                     />
+                    {/* 아이콘 입력란 추가 */}
+                    <textarea
+                      className="text-xs text-blue-600 mb-2 border px-2 py-1 rounded"
+                      value={cardDraft[idx].icon}
+                      onChange={e => setCardDraft(d => { const next = [...d]; next[idx].icon = e.target.value; return next; })}
+                      placeholder="SVG 아이콘 또는 이모지 입력"
+                      rows={2}
+                    />
                     <div className="flex gap-2 mt-2">
                       <button
                         className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
@@ -830,7 +861,9 @@ export default function Home() {
                       <div className="font-bold mb-2">{card.title}</div>
                       <div className="text-gray-500 text-sm mb-4">{card.desc}</div>
                     </div>
-                    <div className="flex justify-end text-blue-400 text-3xl">{card.icon}</div>
+                    <div className="flex justify-end text-blue-400 text-3xl">
+                      <span dangerouslySetInnerHTML={{ __html: card.icon }} />
+                    </div>
                   </>
                 )}
               </div>
@@ -842,146 +875,203 @@ export default function Home() {
       {/* 사진고 섹션 (OUR BUSINESS 카드와 동일 디자인) */}
       <section className="py-20 bg-gray-50">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
+          <div className="text-center mb-16 relative">
             <h2 className="text-4xl font-bold mb-4 text-gray-900">{photoSectionEdit.title}</h2>
             <p className="text-xl text-gray-500">{photoSectionEdit.desc}</p>
+            
+            {isAdmin && !photoEditMode && (
+              <button
+                onClick={() => setPhotoEditMode(true)}
+                className="absolute top-0 right-0 bg-yellow-400 text-black px-6 py-2 rounded-lg flex items-center gap-2 shadow-lg hover:bg-yellow-500 transition-all z-10"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                </svg>
+                수정
+              </button>
+            )}
+            
+            {photoEditMode && (
+              <div className="absolute -top-12 right-0 flex gap-2">
+                <input
+                  className="border rounded px-3 py-1 w-64"
+                  value={photoSectionDraft.title}
+                  onChange={e => setPhotoSectionDraft({...photoSectionDraft, title: e.target.value})}
+                  placeholder="섹션 제목"
+                />
+                <input
+                  className="border rounded px-3 py-1 w-80"
+                  value={photoSectionDraft.desc}
+                  onChange={e => setPhotoSectionDraft({...photoSectionDraft, desc: e.target.value})}
+                  placeholder="섹션 설명"
+                />
+                <button 
+                  onClick={handlePhotoSave}
+                  className="bg-blue-600 text-white px-3 py-1 rounded"
+                >
+                  저장
+                </button>
+                <button 
+                  onClick={() => {
+                    setPhotoEditMode(false);
+                    setPhotoSectionDraft(photoSectionEdit);
+                  }}
+                  className="bg-gray-400 text-white px-3 py-1 rounded"
+                >
+                  취소
+                </button>
+              </div>
+            )}
+            {photoSaveMsg && <div className="text-green-500 mt-2">{photoSaveMsg}</div>}
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-7xl mx-auto">
             {photoCards.map((card, idx) => (
               <div
                 key={idx}
-                className="bg-white rounded-2xl shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-2 flex flex-col overflow-hidden"
-                style={{ height: 480, minWidth: 340, maxWidth: 400 }}
+                data-card-idx={idx}
+                className="bg-white rounded-2xl shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-2 flex flex-col overflow-hidden relative"
+                style={{ width: 350, height: 350, minWidth: 350, maxWidth: 350 }}
               >
-                {/* 이미지 영역: 고정 비율, 높이 240px */}
-                <div className="relative w-full" style={{ height: 240 }}>
-                  <Image
-                    src={card.image || '/images/placeholder.png'}
-                    alt={card.title}
-                    fill
-                    className="object-cover w-full h-full"
-                    style={{ minHeight: 240, maxHeight: 240 }}
-                  />
-                </div>
-                {/* 텍스트 영역: 고정 높이, 내부 내용도 줄수 제한 */}
-                <div className="flex-1 flex flex-col justify-between p-8" style={{ height: 240 }}>
-                  <div>
-                    <h3 className="text-2xl font-bold mb-2 text-gray-900 truncate">{card.title}</h3>
-                    <p className="text-gray-600 text-base mb-4 line-clamp-2" style={{ minHeight: 48 }}>
-                      {card.desc}
-                    </p>
+                {/* 수정 모드일 때 카드 수정 UI */}
+                {photoEditMode && (
+                  <div className="absolute inset-0 bg-white z-20 p-4 flex flex-col">
+                    <h4 className="font-bold mb-2">카드 수정</h4>
+                    
+                    <label className="mt-2 text-sm font-medium">이미지</label>
+                    {photoCardsDraft[idx]?.image && (
+                      <div className="relative w-full mb-2 flex items-center justify-center" style={{ width: 350, height: 240 }}>
+                        <Image
+                          src={photoCardsDraft[idx].image}
+                          alt="미리보기"
+                          width={350}
+                          height={240}
+                          style={{ objectFit: 'cover', width: 350, height: 240 }}
+                        />
+                      </div>
+                    )}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="mb-2 text-sm"
+                      onChange={(e) => handlePhotoFileChange(e, idx)}
+                    />
+                    
+                    <label className="text-sm font-medium">제목</label>
+                    <input
+                      className="border rounded px-2 py-1 mb-2"
+                      value={photoCardsDraft[idx]?.title || ''}
+                      onChange={e => {
+                        const next = [...photoCardsDraft];
+                        next[idx] = {...next[idx], title: e.target.value};
+                        setPhotoCardsDraft(next);
+                      }}
+                    />
+                    
+                    <label className="text-sm font-medium">설명</label>
+                    <textarea
+                      className="border rounded px-2 py-1 mb-2"
+                      rows={3}
+                      value={photoCardsDraft[idx]?.desc || ''}
+                      onChange={e => {
+                        const next = [...photoCardsDraft];
+                        next[idx] = {...next[idx], desc: e.target.value};
+                        setPhotoCardsDraft(next);
+                      }}
+                    />
+                    
+                    {/* 카드 삭제 버튼 */}
+                    <button
+                      className="mt-auto bg-red-500 text-white px-3 py-2 rounded hover:bg-red-600 transition-colors w-full mt-4"
+                      onClick={async () => {
+                        if (confirm('이 카드를 삭제하시겠습니까?')) {
+                          // 1. 로컬 상태에서 제거
+                          const updatedCards = photoCardsDraft.filter((_, index) => index !== idx);
+                          setPhotoCardsDraft(updatedCards);
+                          
+                          // 2. 이미 데이터베이스에 저장된 카드(id가 있는 경우)면 바로 삭제 요청
+                          const cardToDelete = photoCardsDraft[idx];
+                          if (cardToDelete?.id) {
+                            try {
+                              // 즉시 삭제 요청
+                              const response = await fetch(`/api/photo-cards?id=${cardToDelete.id}`, {
+                                method: 'DELETE'
+                              });
+                              
+                              if (response.ok) {
+                                // 삭제 성공하면 UI를 업데이트합니다
+                                setPhotoCards(prev => prev.filter(card => card.id !== cardToDelete.id));
+                                setPhotoSaveMsg('카드가 삭제되었습니다.');
+                                setTimeout(() => setPhotoSaveMsg(''), 2000);
+                              } else {
+                                // 삭제 실패 시 다시 추가
+                                console.error('카드 삭제 실패');
+                                setPhotoCardsDraft(prev => [...prev, cardToDelete]);
+                                setPhotoSaveMsg('카드 삭제 실패');
+                                setTimeout(() => setPhotoSaveMsg(''), 2000);
+                              }
+                            } catch (error) {
+                              console.error('카드 삭제 중 오류:', error);
+                              // 오류 발생 시 다시 추가
+                              setPhotoCardsDraft(prev => [...prev, cardToDelete]);
+                            }
+                          }
+                        }
+                      }}
+                    >
+                      삭제
+                    </button>
                   </div>
-                </div>
+                )}
+                
+                {/* 카드 내용 (수정 모드가 아닐 때만 표시) */}
+                {!photoEditMode && (
+                  <>
+                    {/* 이미지 영역: 고정 비율, 높이 240px */}
+                    <div className="relative w-full flex items-center justify-center" style={{ width: 350, height: 240 }}>
+                      <Image
+                        src={card.image || '/images/placeholder.png'}
+                        alt={card.title}
+                        width={350}
+                        height={240}
+                        style={{ objectFit: 'cover', width: 350, height: 240 }}
+                      />
+                    </div>
+                    {/* 텍스트 영역: 고정 높이, 내부 내용도 줄수 제한 */}
+                    <div className="flex-1 flex flex-col justify-between p-8" style={{ height: 110 }}>
+                      <div>
+                        <h3 className="text-2xl font-bold mb-2 text-gray-900 truncate">{card.title}</h3>
+                        <p className="text-gray-600 text-base mb-4 line-clamp-2" style={{ minHeight: 48 }}>
+                          {card.desc}
+                        </p>
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* About Section */}
-      <section id="about" className="py-32 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="max-w-5xl mx-auto">
-            {aboutEditMode ? (
-              <>
-                <input
-                  className="text-3xl font-bold text-center mb-6 w-full text-black px-2 py-1 rounded"
-                  value={aboutForm.title}
-                  onChange={e => setAboutForm(f => ({ ...f, title: e.target.value }))}
-                />
-                <div className="w-full mt-12">
-                  <div className="flex flex-row w-full gap-6">
-                    {/* Our Vision 카드 */}
-                    <div className="flex-[2] bg-white rounded-xl shadow p-6 flex flex-col items-start justify-start">
-                      <h3 className="text-2xl font-bold text-blue-800 mb-4 text-left">Our Vision</h3>
-                      <textarea
-                        className="text-gray-900 text-lg text-left w-full px-2 py-1 rounded border mb-2"
-                        value={aboutForm.visionContent[0]}
-                        onChange={e => {
-                          const newContent = [...aboutForm.visionContent];
-                          newContent[0] = e.target.value;
-                          setAboutForm(f => ({ ...f, visionContent: newContent }));
-                        }}
-                        rows={3}
-                      />
-                    </div>
-                    {/* Core Values 1 카드 */}
-                    <div className="flex-1 bg-white rounded-xl shadow p-6 flex flex-col items-start justify-start">
-                      <h3 className="text-xl font-bold text-blue-800 mb-4 text-left">Core Values 1</h3>
-                      <textarea
-                        className="text-gray-900 text-lg text-left w-full px-2 py-1 rounded border mb-2"
-                        value={aboutForm.valuesItems[0]}
-                        onChange={e => {
-                          const newItems = [...aboutForm.valuesItems];
-                          newItems[0] = e.target.value;
-                          setAboutForm(f => ({ ...f, valuesItems: newItems }));
-                        }}
-                        rows={3}
-                      />
-                    </div>
-                    {/* Core Values 2 카드 */}
-                    <div className="flex-1 bg-white rounded-xl shadow p-6 flex flex-col items-start justify-start">
-                      <h3 className="text-xl font-bold text-blue-800 mb-4 text-left">Core Values 2</h3>
-                      <textarea
-                        className="text-gray-900 text-lg text-left w-full px-2 py-1 rounded border mb-2"
-                        value={aboutForm.valuesItems[1]}
-                        onChange={e => {
-                          const newItems = [...aboutForm.valuesItems];
-                          newItems[1] = e.target.value;
-                          setAboutForm(f => ({ ...f, valuesItems: newItems }));
-                        }}
-                        rows={3}
-                      />
-                    </div>
+            
+            {/* 수정 모드일 때 새 카드 추가 버튼 */}
+            {photoEditMode && (
+              <div
+                className="bg-white rounded-2xl border-2 border-dashed border-gray-300 flex items-center justify-center cursor-pointer hover:border-blue-500 transition-colors"
+                style={{ height: 480, minWidth: 340, maxWidth: 400 }}
+                onClick={() => {
+                  setPhotoCardsDraft([...photoCardsDraft, {
+                    image: '/images/placeholder.png',
+                    title: '새 카드 제목',
+                    desc: '새 카드 설명을 입력하세요.'
+                  }]);
+                }}
+              >
+                <div className="text-center p-4">
+                  <div className="w-16 h-16 mx-auto bg-blue-100 rounded-full flex items-center justify-center mb-4">
+                    <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
                   </div>
+                  <p className="text-blue-600 font-medium">새 카드 추가</p>
                 </div>
-                <div className="flex gap-2 justify-center mt-6">
-                  <button onClick={handleAboutSave} className="bg-blue-600 text-white px-6 py-2 rounded">저장</button>
-                  <button onClick={() => { setAboutEditMode(false); setAboutForm({ title: initialSiteContent.about.title, visionTitle: initialSiteContent.about.vision.title, visionContent: [...initialSiteContent.about.vision.content], valuesTitle: initialSiteContent.about.values.title, valuesItems: [...initialSiteContent.about.values.items] }) }} className="bg-gray-400 text-white px-6 py-2 rounded">취소</button>
-                </div>
-                {aboutSaveMsg && <div className="text-green-600 mb-2">{aboutSaveMsg}</div>}
-              </>
-            ) : (
-              <>
-                <h2 className="text-5xl font-bold text-center mb-20 text-gray-900">{initialSiteContent.about.title}</h2>
-                <div className="w-full mt-12">
-                  <div className="flex flex-row w-full gap-6">
-                    {/* Our Vision 카드 */}
-                    <div className="flex-[2] bg-white rounded-xl shadow p-6 flex flex-col items-start justify-start">
-                      <h3 className="text-2xl font-bold text-blue-800 mb-4 text-left">Our Vision</h3>
-                      <p className="text-gray-900 text-lg text-left mb-2">{initialSiteContent.about.vision.content[0]}</p>
-                    </div>
-                    {/* Core Values 1 카드 */}
-                    <div className="flex-1 bg-white rounded-xl shadow p-6 flex flex-col items-start justify-start">
-                      <h3 className="text-xl font-bold text-blue-800 mb-4 text-left">Core Values 1</h3>
-                      <ul className="list-disc pl-5 text-gray-900 text-lg text-left w-full mb-2">
-                        {initialSiteContent.about.values.items[0]
-                          .split('\n')
-                          .filter(line => line.trim() !== '')
-                          .map((line, idx) => (
-                            <li key={idx}>{line}</li>
-                          ))}
-                      </ul>
-                    </div>
-                    {/* Core Values 2 카드 */}
-                    <div className="flex-1 bg-white rounded-xl shadow p-6 flex flex-col items-start justify-start">
-                      <h3 className="text-xl font-bold text-blue-800 mb-4 text-left">Core Values 2</h3>
-                      <ul className="list-disc pl-5 text-gray-900 text-lg text-left w-full mb-2">
-                        {initialSiteContent.about.values.items[1]
-                          .split('\n')
-                          .filter(line => line.trim() !== '')
-                          .map((line, idx) => (
-                            <li key={idx}>{line}</li>
-                          ))}
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-                {isAdmin && (
-                  <button onClick={() => setAboutEditMode(true)} className="bg-yellow-400 text-black px-6 py-2 rounded mt-8">수정</button>
-                )}
-                {aboutSaveMsg && <div className="text-green-600 mb-2">{aboutSaveMsg}</div>}
-              </>
+              </div>
             )}
           </div>
         </div>
@@ -989,13 +1079,33 @@ export default function Home() {
 
       {/* Services Section */}
       <section id="services" className="py-32 bg-gray-50">
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-4 relative">
+          {isAdmin && !servicesEditMode && (
+            <button
+              onClick={() => setServicesEditMode(true)}
+              className="fixed top-4 right-4 bg-yellow-400 text-black px-6 py-2 rounded-lg flex items-center gap-2 shadow-lg hover:bg-yellow-500 transition-all z-[100]"
+              style={{ position: 'fixed' }}
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+              </svg>
+              수정
+            </button>
+          )}
+          
           {servicesEditMode ? (
             <>
               <input
                 className="text-3xl font-bold text-center mb-10 w-full text-black px-2 py-1 rounded"
                 value={servicesForm.title}
                 onChange={e => setServicesForm(f => ({ ...f, title: e.target.value }))}
+              />
+              <textarea
+                className="text-center text-gray-400 mb-6 text-xl w-full px-2 py-1 rounded border"
+                value={servicesForm.desc || ''}
+                onChange={e => setServicesForm(f => ({ ...f, desc: e.target.value }))}
+                rows={2}
+                placeholder="당사의 다양한 사업 영역을 소개합니다."
               />
               <div className="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-7xl mx-auto">
                 {servicesForm.items.map((service, i) => (
@@ -1089,14 +1199,14 @@ export default function Home() {
               </div>
               <div className="flex gap-2 justify-center mt-8">
                 <button onClick={handleServicesSave} className="bg-blue-600 text-white px-6 py-2 rounded">저장</button>
-                <button onClick={() => { setServicesEditMode(false); setServicesForm({ title: initialSiteContent.services.title, items: initialSiteContent.services.items.map(item => ({ ...item })) }) }} className="bg-gray-400 text-white px-6 py-2 rounded">취소</button>
+                <button onClick={() => { setServicesEditMode(false); setServicesForm({ title: initialSiteContent.services.title, desc: initialSiteContent.services.desc || '당사의 다양한 사업 영역을 소개합니다.', items: initialSiteContent.services.items.map(item => ({ ...item })) }) }} className="bg-gray-400 text-white px-6 py-2 rounded">취소</button>
               </div>
               {servicesSaveMsg && <div className="text-green-600 mb-2">{servicesSaveMsg}</div>}
             </>
           ) : (
             <>
-              <h2 className="text-5xl font-bold text-center mb-6 text-gray-900">{initialSiteContent.services.title}</h2>
-              <p className="text-center text-gray-400 mb-6 text-xl">당사의 다양한 사업 영역을 소개합니다.</p>
+              <h2 className="text-5xl font-bold text-center mb-6 text-gray-900">{servicesForm.title || initialSiteContent.services.title}</h2>
+              <p className="text-center text-gray-400 mb-6 text-xl">{servicesForm.desc || '당사의 다양한 사업 영역을 소개합니다.'}</p>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-7xl mx-auto">
                 {initialSiteContent.services.items.map((service, i) => (
                   <div key={i} className="bg-white p-10 rounded-2xl shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-2">
@@ -1177,14 +1287,20 @@ export default function Home() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {portfolioItems.slice(0, 4).map((item, idx) => (
-              <div key={item.id} className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition">
-                <div className="relative h-64">
-                  <Image src={item.image} alt={item.title} fill className="object-contain" />
+              <div key={item.id} className="bg-white shadow-lg overflow-hidden hover:shadow-2xl transition" style={{ width: 350, height: 350, minWidth: 350, minHeight: 350, maxWidth: 350, maxHeight: 350 }}>
+                <div className="relative" style={{ width: 350, height: 240 }}>
+                  <Image
+                    src={item.image}
+                    alt={item.title}
+                    width={350}
+                    height={240}
+                    style={{ objectFit: 'cover', width: 350, height: 240, display: 'block' }}
+                  />
                   {idx === 0 && (
                     <span className="absolute top-4 right-4 bg-gray-700 text-white text-xs px-3 py-1 rounded">NEW</span>
                   )}
                 </div>
-                <div className="p-6 text-center">
+                <div className="p-6 text-center" style={{ height: 110 }}>
                   <h3 className="text-xl font-semibold mb-2">{item.title} {idx === 0 && <span className="text-red-500">❤</span>}</h3>
                   <p className="text-gray-500 text-sm">{item.overview}</p>
                 </div>

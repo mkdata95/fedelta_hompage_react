@@ -52,14 +52,13 @@ export const siteContent = {
         "신뢰와 책임감"
       ]
     },
-    "timeline": [
-      // 2003, 2004 항목 삭제됨
-    ],
+    "timeline": [],
     "greeting": "국내 최초 홀로그램 스크린 상용화!\n제품 브랜드 : 홀로애드(hoload)",
     "description": "훼델타는 국내 제작과 특허등록으로 일반 광고시장의 적용 및 소규모의 쇼윈도우 매장등에 활성화시켜 기존 광고 매체에서 벗어난 신개념의 3D 홀로그래픽 광고채널 구축을 목적으로 합니다.\n\n요즈음 수많은 홀로그램 전문 회사들이 왕성한 활동을 시작하면서 영상 문화의 성격들도 매우 다양하고 의미 있게 발전을 거듭하여 왔습니다.\n\n본사는 다양해진 고객들의 기호에 맞는 영상 시스템을 개발 제작함과 더불어 여기에 그치지 않고 부가적인 컨텐츠를 준비 중에 있습니다.\n\n다양한 사업영역 확대를 통해 명실 공히 영상 문화사업을 이끄는 첨병으로서의 '훼델타'가 될 것입니다.\n\n감사합니다."
   },
   "services": {
     "title": "Our Services",
+    "desc": "당사의 다양한 사업 영역을 소개합니다.",
     "items": [
       {
         "id": "service-1",
@@ -77,7 +76,7 @@ export const siteContent = {
         "id": "service-3",
         "title": "클라우드 솔루션",
         "description": "안정적이고 확장 가능한 클라우드 인프라 구축",
-        "icon": "FiCloud"
+        "icon": "<svg viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M9 16.2l-3.5-3.5 1.41-1.41L9 13.38l7.09-7.09 1.41 1.41z\"/></svg>"
       }
     ]
   },
@@ -666,6 +665,6 @@ export const siteContent = {
   },
   "photoSection": {
     "title": "OUR BUSINESS",
-    "desc": "당사의 다양한 사업 영역을 소개합니다."
+    "desc": "당사의 다양한 사업 영역을 소개합니다.1"
   }
 }

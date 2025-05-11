@@ -70,4 +70,14 @@ model InfoCard {
   desc    String
   bgColor String
   bgImage String?
+}
+
+model PageSettings {
+  id              Int      @id @default(autoincrement())
+  page            String   @unique
+  title           String
+  subtitle        String?
+  backgroundImage String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 } 

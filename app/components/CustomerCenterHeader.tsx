@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import PageHeader from './PageHeader'
 
 interface CustomerCenterHeaderProps {
   activeTab: 'notice' | 'quote' | 'contact' | 'location';
@@ -14,10 +15,8 @@ const tabs = [
 export default function CustomerCenterHeader({ activeTab }: CustomerCenterHeaderProps) {
   return (
     <>
-      {/* 상단 비주얼 */}
-      <div className="relative w-full h-56 bg-black flex items-center justify-center mt-24">
-        <h1 className="text-white text-4xl md:text-5xl font-extrabold tracking-tight">고객센터</h1>
-      </div>
+      {/* 인라인 수정 가능한 상단 비주얼 */}
+      <PageHeader title="고객센터" pageKey="customer" />
       {/* 탭 메뉴 */}
       <div className="bg-white border-b">
         <div className="flex justify-center gap-8 py-4">

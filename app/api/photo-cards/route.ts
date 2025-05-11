@@ -26,8 +26,13 @@ export async function PUT(req: NextRequest) {
 
 // DELETE: 카드 삭제 (id 필요)
 export async function DELETE(req: NextRequest) {
-  const data = await req.json();
-  const { id } = data;
+  const { searchParams } = new URL(req.url);
+  const id = Number(searchParams.get('id'));
+  
+  if (!id) {
+    return NextResponse.json({ error: 'ID is required' }, { status: 400 });
+  }
+  
   await prisma.photoCard.delete({ where: { id } });
   return NextResponse.json({ ok: true });
 } 

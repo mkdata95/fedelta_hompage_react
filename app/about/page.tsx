@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { siteContent } from '../data/siteContent'
 import Image from 'next/image'
 import dynamic from 'next/dynamic'
+import PageHeader from '../components/PageHeader'
 
 const timelineDefault = siteContent.about.timeline || [
   { year: '2003', event: '회사 설립\nDPC 법인설립' },
@@ -17,11 +18,17 @@ const timelineDefault = siteContent.about.timeline || [
 // 기본 로고 이미지 경로 수정
 const defaultLogo = '/images/default-logo.png'
 
-const Editor = dynamic(() => import('@tinymce/tinymce-react').then(mod => mod.Editor), { ssr: false }) as any
+// TinyMCE 에디터를 RichTextEditor 컴포넌트로 교체
+const RichTextEditor = dynamic(() => import('@/components/RichTextEditor'), { ssr: false })
 
 export default function AboutPage() {
   const [isAdmin, setIsAdmin] = useState(false)
   const [editMode, setEditMode] = useState(false)
+  const [headerData, setHeaderData] = useState({
+    title: '회사소개',
+    subtitle: '고객을 가장 먼저 생각하는 기업, 고객이 먼저 자랑하는 기업이 되겠습니다.',
+    backgroundImage: '/images/about-hero.jpg'
+  })
   const [about, setAbout] = useState({
     title: '',
     visionTitle: '',
@@ -54,6 +61,22 @@ export default function AboutPage() {
       })
   }, [])
 
+  // 헤더 데이터 로드
+  useEffect(() => {
+    fetch('/api/page-settings?page=about')
+      .then(res => res.json())
+      .then(data => {
+        if (data) {
+          setHeaderData({
+            title: data.title || '회사소개',
+            subtitle: data.subtitle || '고객을 가장 먼저 생각하는 기업, 고객이 먼저 자랑하는 기업이 되겠습니다.',
+            backgroundImage: data.backgroundImage || '/images/about-hero.jpg'
+          })
+        }
+      })
+      .catch(err => console.error('헤더 데이터 로드 오류:', err))
+  }, [])
+
   // 저장
   const handleSave = async () => {
     setSaveMsg('저장 중...')
@@ -72,20 +95,34 @@ export default function AboutPage() {
     setTimeout(() => setSaveMsg(''), 2000)
   }
 
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    const formData = new FormData()
+    formData.append('file', file)
+
+    try {
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData
+      })
+      const data = await res.json()
+      if (data.fileUrl) {
+        setHeaderData(prev => ({ ...prev, backgroundImage: data.fileUrl }))
+      }
+    } catch (error) {
+      console.error('이미지 업로드 오류:', error)
+    }
+  }
+
   return (
     <main className="bg-white min-h-screen">
-      {/* Hero Section */}
-      <div className="relative w-full h-64 md:h-80 flex items-center justify-center" style={{ backgroundColor: '#181617', backgroundImage: 'url(/images/hero-default.jpg)', backgroundSize: 'cover', backgroundPosition: 'center', marginTop: '48px' }}>
-        <div className="absolute inset-0 bg-black opacity-60"></div>
-        <div className="relative z-10 text-center w-full pt-12">
-          {editMode ? (
-            <input className="text-4xl md:text-5xl font-bold text-white mb-2 bg-white/80 px-2 py-1 rounded" value={aboutDraft.title} onChange={e => setAboutDraft(d => ({ ...d, title: e.target.value }))} />
-          ) : (
-            <h1 className="text-4xl md:text-5xl font-bold text-white mb-2">{about.title}</h1>
-          )}
-          <p className="text-lg text-gray-200">고객을 가장 먼저 생각하는 기업, 고객이 먼저 자랑하는 기업이 되겠습니다.</p>
-        </div>
-      </div>
+      <PageHeader
+        title={about.title || "회사소개"}
+        subtitle="고객을 가장 먼저 생각하는 기업, 고객이 먼저 자랑하는 기업이 되겠습니다."
+        pageKey="about"
+      />
       {/* 인사말/소개 */}
       <section className="py-20">
         <div className="container mx-auto px-4 max-w-6xl flex flex-col md:flex-row items-center gap-16">
@@ -170,11 +207,9 @@ export default function AboutPage() {
                     }}
                   />
                 ) : (
-                  <Image
+                  <img
                     src={defaultLogo}
                     alt="회사 로고"
-                    width={320}
-                    height={200}
                     className="w-80 h-48 object-contain"
                   />
                 )}
@@ -189,21 +224,9 @@ export default function AboutPage() {
               <>
                 <input className="text-2xl font-bold mb-6 text-[#222831] w-full bg-white/80 px-2 py-1 rounded" value={aboutDraft.visionTitle} onChange={e => setAboutDraft(d => ({ ...d, visionTitle: e.target.value }))} />
                 <div className="w-full mb-4">
-                  <Editor
-                    apiKey="no-api-key"
+                  <RichTextEditor
                     value={aboutDraft.visionContent}
-                    init={{
-                      height: 200,
-                      menubar: false,
-                      plugins: [
-                        'advlist autolink lists link charmap preview anchor',
-                        'searchreplace visualblocks code',
-                        'insertdatetime table paste help wordcount'
-                      ],
-                      toolbar:
-                        'undo redo | formatselect | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | help',
-                    }}
-                    onEditorChange={content => setAboutDraft(d => ({ ...d, visionContent: content }))}
+                    onChange={content => setAboutDraft(d => ({ ...d, visionContent: content }))}
                   />
                 </div>
               </>
@@ -235,7 +258,7 @@ export default function AboutPage() {
           )}
         </div>
       </section>
-      {/* 관리자용 버튼 */}
+      {/* 관리자용 본문 수정 버튼 (하단) */}
       {isAdmin && (
         <div className="flex gap-2 justify-center my-8">
           {editMode ? (
@@ -244,11 +267,73 @@ export default function AboutPage() {
               <button onClick={() => { setEditMode(false); setAboutDraft(about) }} className="bg-gray-400 text-white px-6 py-2 rounded">취소</button>
             </>
           ) : (
-            <button onClick={() => setEditMode(true)} className="bg-yellow-400 text-black px-6 py-2 rounded">수정</button>
+            <button onClick={() => setEditMode(true)} className="bg-yellow-400 text-black px-6 py-2 rounded">본문 수정</button>
           )}
         </div>
       )}
       {saveMsg && <div className="text-center text-green-600 mb-4">{saveMsg}</div>}
+
+      {/* 편집 모달 */}
+      {isAdmin && editMode && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-40 flex items-center justify-center">
+          <div className="bg-white rounded-lg p-6 w-96 max-w-full">
+            <h3 className="text-xl font-bold mb-4">헤더 섹션 수정</h3>
+            
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-1">타이틀</label>
+              <input
+                type="text"
+                value={headerData.title}
+                onChange={(e) => setHeaderData(prev => ({ ...prev, title: e.target.value }))}
+                className="w-full px-3 py-2 border rounded"
+              />
+            </div>
+            
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-1">부제목</label>
+              <textarea
+                value={headerData.subtitle}
+                onChange={(e) => setHeaderData(prev => ({ ...prev, subtitle: e.target.value }))}
+                className="w-full px-3 py-2 border rounded"
+                rows={3}
+              />
+            </div>
+            
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-1">배경 이미지</label>
+              {headerData.backgroundImage && (
+                <div className="relative w-full h-32 mb-2">
+                  <img
+                    src={headerData.backgroundImage}
+                    alt="배경 미리보기"
+                    className="w-full h-full object-cover rounded"
+                  />
+                </div>
+              )}
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleFileUpload}
+                className="w-full"
+              />
+            </div>
+            <div className="flex justify-end gap-2 mt-6">
+              <button
+                onClick={handleSave}
+                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+              >
+                확인
+              </button>
+              <button
+                onClick={() => setEditMode(false)}
+                className="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500"
+              >
+                취소
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   )
 } 

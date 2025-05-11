@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Editor } from '@tinymce/tinymce-react';
 
 interface RichTextEditorProps {
@@ -11,6 +11,28 @@ interface RichTextEditorProps {
  * React-Quill이 React 18과 호환성 문제가 있어서 임시로 사용
  */
 const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange }) => {
+  const [apiKey, setApiKey] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+
+  // API 키 불러오기
+  useEffect(() => {
+    const loadApiKey = async () => {
+      try {
+        const response = await fetch('/api/tinymce-settings');
+        if (response.ok) {
+          const data = await response.json();
+          setApiKey(data.apiKey || '');
+        }
+      } catch (error) {
+        console.error('TinyMCE API 키 로드 오류:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadApiKey();
+  }, []);
+
   const handleImageUpload = async (blobInfo: any, progress: any) => {
     try {
       const formData = new FormData();
@@ -36,9 +58,13 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange }) => {
     }
   };
 
+  if (isLoading) {
+    return <div className="p-4 border rounded min-h-[200px] flex items-center justify-center bg-gray-50">에디터 로딩 중...</div>;
+  }
+
   return (
     <Editor
-      apiKey="i9u0xro7dpt1f3d69shwf0lt68tgrbrt0y2l589zoynivamm"
+      apiKey={apiKey || 'no-api-key'}
       value={value}
       onEditorChange={(content) => onChange(content)}
       init={{

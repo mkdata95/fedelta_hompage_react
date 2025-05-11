@@ -80,6 +80,7 @@ export default function AdminLayout({
                 <Link href="/admin/siteinfo" className={`block px-4 py-2 rounded ${pathname.startsWith('/admin/siteinfo') ? 'bg-blue-700 text-white font-semibold' : 'hover:bg-gray-800 text-white'}`}>사이트 정보</Link>
                 <Link href="/admin/password" className={`block px-4 py-2 rounded ${pathname.startsWith('/admin/password') ? 'bg-blue-700 text-white font-semibold' : 'hover:bg-gray-800 text-white'}`}>비밀번호 변경</Link>
                 <Link href="/admin/smtp" className={`block px-4 py-2 rounded ${pathname.startsWith('/admin/smtp') ? 'bg-blue-700 text-white font-semibold' : 'hover:bg-gray-800 text-white'}`}>SMTP 정보</Link>
+                <Link href="/admin/tinymce" className={`block px-4 py-2 rounded ${pathname.startsWith('/admin/tinymce') ? 'bg-blue-700 text-white font-semibold' : 'hover:bg-gray-800 text-white'}`}>TinyMCE 설정</Link>
               </div>
             )}
           </div>
