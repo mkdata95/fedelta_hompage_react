@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { siteContent } from '../../data/siteContent'
 
 interface FormField {
   label: string;
@@ -25,8 +24,21 @@ interface SiteContent {
   [key: string]: ContactContent | unknown;
 }
 
+// siteContent를 대체할 임시 데이터
+const defaultContent = {
+  contact: {
+    title: '문의하기',
+    form: {
+      name: { label: '이름', placeholder: '이름을 입력하세요' },
+      email: { label: '이메일', placeholder: '이메일을 입력하세요' },
+      message: { label: '메시지', placeholder: '메시지를 입력하세요' },
+      submit: '보내기'
+    }
+  }
+};
+
 export default function ContactPage() {
-  const [content, setContent] = useState<SiteContent>(siteContent)
+  const [content, setContent] = useState<SiteContent>(defaultContent)
   const [isSaving, setIsSaving] = useState(false)
   const [saveMessage, setSaveMessage] = useState('')
 
