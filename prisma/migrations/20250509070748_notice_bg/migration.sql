@@ -1,5 +1,0 @@
--- CreateTable
-CREATE TABLE "NoticeBg" (
-    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-    "image" TEXT NOT NULL
-);

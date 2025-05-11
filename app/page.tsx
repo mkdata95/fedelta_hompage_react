@@ -1026,25 +1026,25 @@ export default function Home() {
                 {/* 카드 내용 (수정 모드가 아닐 때만 표시) */}
                 {!photoEditMode && (
                   <>
-                    {/* 이미지 영역: 고정 비율, 높이 240px */}
+                {/* 이미지 영역: 고정 비율, 높이 240px */}
                     <div className="relative w-full flex items-center justify-center" style={{ width: 350, height: 240 }}>
-                      <Image
-                        src={card.image || '/images/placeholder.png'}
-                        alt={card.title}
+                  <Image
+                    src={card.image || '/images/placeholder.png'}
+                    alt={card.title}
                         width={350}
                         height={240}
                         style={{ objectFit: 'cover', width: 350, height: 240 }}
-                      />
-                    </div>
-                    {/* 텍스트 영역: 고정 높이, 내부 내용도 줄수 제한 */}
+                  />
+                </div>
+                {/* 텍스트 영역: 고정 높이, 내부 내용도 줄수 제한 */}
                     <div className="flex-1 flex flex-col justify-between p-8" style={{ height: 110 }}>
-                      <div>
-                        <h3 className="text-2xl font-bold mb-2 text-gray-900 truncate">{card.title}</h3>
-                        <p className="text-gray-600 text-base mb-4 line-clamp-2" style={{ minHeight: 48 }}>
-                          {card.desc}
-                        </p>
-                      </div>
-                    </div>
+                  <div>
+                    <h3 className="text-2xl font-bold mb-2 text-gray-900 truncate">{card.title}</h3>
+                    <p className="text-gray-600 text-base mb-4 line-clamp-2" style={{ minHeight: 48 }}>
+                      {card.desc}
+                    </p>
+                  </div>
+                </div>
                   </>
                 )}
               </div>
