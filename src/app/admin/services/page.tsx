@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { siteContent } from '../../data/siteContent'
+// import { siteContent } from '../../data/siteContent'
 import { FiPlus, FiTrash2, FiEdit2, FiCode, FiSmartphone, FiCloud, FiBox } from 'react-icons/fi'
 import { IconType } from 'react-icons'
 
@@ -12,8 +12,20 @@ const iconMap: { [key: string]: IconType } = {
   FiBox
 }
 
+// 임시 데이터
+const defaultContent = {
+  services: {
+    title: '서비스 섹션',
+    items: [
+      { id: 'service-1', title: '서비스1', description: '설명1', icon: 'FiBox' },
+      { id: 'service-2', title: '서비스2', description: '설명2', icon: 'FiCode' }
+    ]
+  }
+};
+
 export default function ServicesPage() {
-  const [content, setContent] = useState(siteContent)
+  // const [content, setContent] = useState(siteContent)
+  const [content, setContent] = useState(defaultContent)
   const [isSaving, setIsSaving] = useState(false)
   const [saveMessage, setSaveMessage] = useState('')
   const [editingIndex, setEditingIndex] = useState<number | null>(null)
