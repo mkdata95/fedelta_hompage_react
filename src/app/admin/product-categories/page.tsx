@@ -1,18 +1,16 @@
 "use client"
 
 import { useState } from 'react'
-import { useSiteContent } from '../../context/SiteContentContext'
+// import { useSiteContent } from '../../context/SiteContentContext'
 import { FiTrash2, FiEdit2, FiCheck, FiPlus } from 'react-icons/fi'
 
-interface SiteContent {
-  products?: {
-    categories?: string[];
-  };
-}
+// 임시 데이터
+const defaultCategories = ["카테고리1", "카테고리2"];
 
 export default function ProductCategoriesPage() {
-  const { siteContent } = useSiteContent()
-  const [categories, setCategories] = useState<string[]>((siteContent as SiteContent).products?.categories || [])
+  // const { siteContent } = useSiteContent()
+  // const [categories, setCategories] = useState<string[]>((siteContent as SiteContent).products?.categories || [])
+  const [categories, setCategories] = useState<string[]>(defaultCategories)
   const [isSaving, setIsSaving] = useState(false)
   const [saveMessage, setSaveMessage] = useState('')
   const [newCategory, setNewCategory] = useState('')
@@ -50,10 +48,9 @@ export default function ProductCategoriesPage() {
   const handleSave = async () => {
     setIsSaving(true)
     setSaveMessage('저장 중...')
+    // 임시 newContent
     const newContent = {
-      ...(siteContent as SiteContent),
       products: {
-        ...((siteContent as SiteContent).products),
         categories
       }
     }
