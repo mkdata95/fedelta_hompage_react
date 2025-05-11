@@ -1,11 +1,12 @@
 "use client"
 
 import { useState } from 'react'
-import { siteContent } from '../../data/siteContent'
 import { FiTrash2, FiEdit2, FiCheck, FiPlus } from 'react-icons/fi'
 
 export default function CategoriesPage() {
-  const [categories, setCategories] = useState(siteContent.projects.categories)
+  // siteContent.projects.categories를 대체할 임시 데이터
+  const defaultCategories = ["카테고리1", "카테고리2", "카테고리3"];
+  const [categories, setCategories] = useState(defaultCategories)
   const [isSaving, setIsSaving] = useState(false)
   const [saveMessage, setSaveMessage] = useState('')
   const [newCategory, setNewCategory] = useState('')
@@ -43,10 +44,9 @@ export default function CategoriesPage() {
   const handleSave = async () => {
     setIsSaving(true)
     setSaveMessage('저장 중...')
+    // siteContent를 대체하는 임시 newContent
     const newContent = {
-      ...siteContent,
       projects: {
-        ...siteContent.projects,
         categories
       }
     }
